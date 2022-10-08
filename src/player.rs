@@ -1,3 +1,4 @@
+use std::os::unix::raw::time_t;
 use crate::{Bundle, Commands, SpriteSheetBundle};
 use bevy::prelude::*;
 use crate::components::{Player, Velocity};
@@ -31,20 +32,25 @@ fn player_keyboard_system(
 ) {
     if let Ok(mut velocity) = query.get_single_mut() {
         velocity.x = if kb.pressed(KeyCode::Left) {
-            -1.
+            -20.
         } else if kb.pressed(KeyCode::Right) {
-            1.
+            20.
         } else {
             0.
         }
     }
 }
 
-fn player_movement_system(mut query: Query<(&Velocity, &mut Transform), With<Player>>) {
-    for (velocity, mut transform) in query.iter_mut() {
+fn player_movement_system(
+    mut query: Query<(&mut Velocity, &mut Transform), With<Player>>,
+    time: Res<Time>
+) {
+    for (mut velocity, mut transform) in query.iter_mut() {
         let translation = &mut transform.translation;
 
-        translation.x += velocity.x;
-        translation.y += velocity.y;
+        velocity.y -= 2.5;
+
+        translation.x += velocity.x * time.delta_seconds();
+        translation.y += velocity.y * time.delta_seconds();
     }
 }
