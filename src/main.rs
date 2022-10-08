@@ -1,9 +1,11 @@
 mod player;
 mod components;
+mod ground;
 
 use bevy::prelude::*;
 use bevy_retro_camera::RetroCameraPlugin;
 use bevy_retro_camera::RetroCameraBundle;
+use crate::ground::GroundPlugin;
 use crate::player::PlayerPlugin;
 
 fn main() {
@@ -17,6 +19,7 @@ fn main() {
         .insert_resource(ClearColor(Color::rgb(0.5, 0.5, 0.65)))
         .add_plugin(RetroCameraPlugin)
         .add_plugin(PlayerPlugin)
+        .add_plugin(GroundPlugin)
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup)
         .run()
