@@ -6,6 +6,13 @@ pub struct Velocity {
     pub y: f32
 }
 
+
+#[derive(Default)]
+pub struct WindowSize {
+    pub w: f32,
+    pub h: f32
+}
+
 #[derive(Component)]
 pub struct Player;
 

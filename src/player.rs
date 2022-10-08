@@ -1,6 +1,8 @@
-use std::os::unix::raw::time_t;
+use bevy::math::Vec3Swizzles;
 use bevy::prelude::*;
-use crate::components::{Player, Velocity};
+use bevy::sprite::collide_aabb::{collide, Collision};
+use bevy::utils::tracing::instrument::WithDispatch;
+use crate::components::{Ground, Player, Velocity};
 
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
@@ -42,6 +44,7 @@ fn player_keyboard_system(
 
 fn player_movement_system(
     mut query: Query<(&mut Velocity, &mut Transform), With<Player>>,
+    mut ground_query: Query<(&mut Transform), (With<Ground>, Without<Player>)>,
     time: Res<Time>
 ) {
     for (mut velocity, mut transform) in query.iter_mut() {
@@ -49,7 +52,28 @@ fn player_movement_system(
 
         velocity.y -= 2.5;
 
-        translation.x += velocity.x * time.delta_seconds();
+        for transform2 in ground_query.iter() {
+            match collide(
+                transform2.translation.xyz(), Vec2 {x: 32.0, y: 64.0},
+                translation.xyz(), Vec2 {x: 32.0, y: 32.0} ) {
+                Some(collision) => {
+                    match collision {
+                        Collision::Bottom => {
+                            velocity.y = 50.0;
+                        }
+                        Collision::Right | Collision::Left => {
+                            velocity.x = 0.0;
+                        }
+                        _ => {}
+                    }
+                }
+                None => {}
+            }
+        }
+
         translation.y += velocity.y * time.delta_seconds();
+        for mut transform2 in ground_query.iter_mut() {
+            transform2.translation.x += -velocity.x * time.delta_seconds();
+        }
     }
 }
