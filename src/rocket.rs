@@ -1,4 +1,3 @@
-use std::f32::MAX;
 use std::io::Cursor;
 use bevy::ecs::entity::Entities;
 use bevy::input::mouse::MouseMotion;
@@ -40,7 +39,6 @@ fn rocket_spawn_system(
         let x = window.width()/2.0;
         let y = window.height()/2.0;
         let mut rot = (position.y - y).atan2(position.x - x);
-        println!("{} {} {} {}", x, y, position.x, position.y);
         vx = rot.cos()*10.0;
         vy = rot.sin()*10.0;
     }
@@ -63,6 +61,7 @@ fn rocket_movement_system(
     mut commands: Commands,
     mut query: Query<(&mut Transform, Entity, &Velocity), With<Rocket>>,
     mut ground_query: Query<(&mut Transform), (With<Ground>, Without<Rocket>)>,
+    mut player_query: Query<(&mut Velocity, &mut Transform), (With<Player>, Without<Ground>, Without<Rocket>)>,
     mut window_size: Res<WindowSize>
 ) {
     'outer: for (mut transform, entity, velocity) in query.iter_mut() {
@@ -79,7 +78,20 @@ fn rocket_movement_system(
                 transform2.translation.xyz(), Vec2 {x: 32.0, y: 128.0},
                 transform.translation.xyz(), Vec2 {x: 5.0, y: 5.0}
             ) {
-                Some(collision) => {
+                Some(_collision) => {
+                    for (mut velocity, mut transform3) in player_query.iter_mut() {
+                        let distance_x = transform3.translation.x - transform.translation.x;
+                        let distance_y = transform3.translation.y - transform.translation.y;
+                        let distance = (distance_x*distance_x + distance_y*distance_y).sqrt();
+                        let rot = (distance_y).atan2(distance_x);
+                        if distance < 50.0 {
+                            let vx = (rot.cos() * 2500.0)/distance;
+                            let vy = (rot.sin() * 2500.0)/distance;
+
+                            velocity.x += vx;
+                            velocity.y += vy;
+                        }
+                    }
                     commands.entity(entity).despawn();
                     break 'outer;
                 }
