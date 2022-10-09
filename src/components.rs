@@ -1,4 +1,5 @@
 use bevy::prelude::Component;
+use crate::{Handle, Image};
 
 #[derive(Component)]
 pub struct Velocity {
@@ -11,6 +12,12 @@ pub struct Velocity {
 pub struct WindowSize {
     pub w: f32,
     pub h: f32
+}
+
+#[derive(Default)]
+pub struct PlayerTextures {
+    pub normal: Handle<Image>,
+    pub shooting: Handle<Image>
 }
 
 #[derive(Component)]

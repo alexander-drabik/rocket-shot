@@ -2,10 +2,11 @@ mod player;
 mod components;
 mod ground;
 
+use bevy::asset::Asset;
 use bevy::prelude::*;
 use bevy_retro_camera::RetroCameraPlugin;
 use bevy_retro_camera::RetroCameraBundle;
-use crate::components::WindowSize;
+use crate::components::{PlayerTextures, WindowSize};
 use crate::ground::GroundPlugin;
 use crate::player::PlayerPlugin;
 
@@ -28,10 +29,12 @@ fn main() {
         .run()
 }
 
-fn setup(mut commands: Commands) {
+fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let height: f32 = 240.0;  // Viewport size
     let scale: f32 = 1.0;  // Viewport scaling factor
     commands.spawn_bundle(RetroCameraBundle::fixed_height(height, scale));
+
+    commands.insert_resource(PlayerTextures {normal: asset_server.load("player.png"), shooting: asset_server.load("player_shoot.png")})
 }
 
 fn window_resize_system(mut commands: Commands, mut windows: ResMut<Windows>) {
