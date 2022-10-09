@@ -7,7 +7,6 @@ pub struct Velocity {
     pub y: f32
 }
 
-
 #[derive(Default)]
 pub struct WindowSize {
     pub w: f32,
@@ -25,3 +24,6 @@ pub struct Player;
 
 #[derive(Component)]
 pub struct Ground;
+
+#[derive(Component)]
+pub struct Rocket;

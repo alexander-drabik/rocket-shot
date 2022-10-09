@@ -8,7 +8,7 @@ use bevy::sprite::collide_aabb::{collide, Collision};
 use bevy::tasks::{AsyncComputeTaskPool, ComputeTaskPool};
 use bevy::utils::tracing::instrument::WithDispatch;
 use crate::components::{Ground, Player, Velocity};
-use crate::PlayerTextures;
+use crate::{PlayerTextures, RocketPlugin, Shooting};
 
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
@@ -39,10 +39,10 @@ fn player_keyboard_system(
     mut query: Query<&mut Velocity, With<Player>>
 ) {
     if let Ok(mut velocity) = query.get_single_mut() {
-        velocity.x = if kb.pressed(KeyCode::Left) {
-            -20.
+        velocity.x += if kb.pressed(KeyCode::Left) {
+            -2.
         } else if kb.pressed(KeyCode::Right) {
-            20.
+            2.
         } else {
             0.
         }
@@ -53,6 +53,7 @@ fn player_mouse_system(
     mouse: Res<Input<MouseButton>>,
     mut query: Query<&mut Handle<Image>, With<Player>>,
     player_textures: Res<PlayerTextures>,
+    mut state: ResMut<State<Shooting>>
 ) {
     if mouse.pressed(MouseButton::Left) {
         if let Ok(mut texture) = query.get_single_mut() {
@@ -61,6 +62,9 @@ fn player_mouse_system(
     } else if mouse.just_released(MouseButton::Left) {
         if let Ok(mut texture) = query.get_single_mut() {
             *texture = player_textures.normal.clone();
+            if !matches!(state.current(), Shooting::Shooting) {
+                state.set(Shooting::Shooting).unwrap();
+            }
         }
     }
 }
@@ -77,12 +81,13 @@ fn player_movement_system(
 
         for transform2 in ground_query.iter() {
             match collide(
-                transform2.translation.xyz(), Vec2 {x: 32.0, y: 64.0},
+                transform2.translation.xyz(), Vec2 {x: 32.0, y: 128.0},
                 translation.xyz(), Vec2 {x: 32.0, y: 32.0} ) {
                 Some(collision) => {
                     match collision {
                         Collision::Bottom => {
                             velocity.y = 50.0;
+                            velocity.x /= 3.5;
                         }
                         Collision::Right | Collision::Left => {
                             velocity.x = 0.0;
@@ -94,8 +99,8 @@ fn player_movement_system(
             }
         }
 
-        translation.y += velocity.y * time.delta_seconds();
         for mut transform2 in ground_query.iter_mut() {
+            transform2.translation.y += -velocity.y * time.delta_seconds();
             transform2.translation.x += -velocity.x * time.delta_seconds();
         }
     }

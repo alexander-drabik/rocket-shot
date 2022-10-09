@@ -1,6 +1,7 @@
 mod player;
 mod components;
 mod ground;
+mod rocket;
 
 use bevy::asset::Asset;
 use bevy::prelude::*;
@@ -9,6 +10,15 @@ use bevy_retro_camera::RetroCameraBundle;
 use crate::components::{PlayerTextures, WindowSize};
 use crate::ground::GroundPlugin;
 use crate::player::PlayerPlugin;
+use crate::rocket::RocketPlugin;
+
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Copy)]
+pub enum Shooting {
+    Shooting,
+    NotShooting
+}
+
+const DEGREE: f32 = 0.0174532925;
 
 fn main() {
     App::new()
@@ -20,9 +30,11 @@ fn main() {
         })
         .insert_resource(ClearColor(Color::rgb(0.5, 0.5, 0.65)))
         .insert_resource(WindowSize{w: 0.0, h: 0.0})
+        .add_state(Shooting::NotShooting)
         .add_plugin(RetroCameraPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(GroundPlugin)
+        .add_plugin(RocketPlugin)
         .add_plugins(DefaultPlugins)
         .add_startup_system(setup)
         .add_system(window_resize_system)
