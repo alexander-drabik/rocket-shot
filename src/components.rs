@@ -19,6 +19,9 @@ pub struct PlayerTextures {
     pub shooting: Handle<Image>
 }
 
+#[derive(Default)]
+pub struct PlayerCoords(pub f32, pub f32);
+
 #[derive(Component)]
 pub struct Player;
 

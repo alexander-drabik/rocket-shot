@@ -7,8 +7,8 @@ use bevy::asset::Asset;
 use bevy::prelude::*;
 use bevy_retro_camera::RetroCameraPlugin;
 use bevy_retro_camera::RetroCameraBundle;
-use crate::components::{PlayerTextures, WindowSize};
-use crate::ground::GroundPlugin;
+use crate::components::{PlayerTextures, PlayerCoords, WindowSize};
+use crate::ground::{GroundPlugin, NewGround};
 use crate::player::PlayerPlugin;
 use crate::rocket::RocketPlugin;
 
@@ -30,7 +30,9 @@ fn main() {
         })
         .insert_resource(ClearColor(Color::rgb(0.5, 0.5, 0.65)))
         .insert_resource(WindowSize{w: 0.0, h: 0.0})
+        .insert_resource(PlayerCoords(0.0, 0.0))
         .add_state(Shooting::NotShooting)
+        .add_state(NewGround::No)
         .add_plugin(RetroCameraPlugin)
         .add_plugin(PlayerPlugin)
         .add_plugin(GroundPlugin)
@@ -46,7 +48,12 @@ fn setup(mut commands: Commands, asset_server: Res<AssetServer>) {
     let scale: f32 = 1.0;  // Viewport scaling factor
     commands.spawn_bundle(RetroCameraBundle::fixed_height(height, scale));
 
-    commands.insert_resource(PlayerTextures {normal: asset_server.load("player.png"), shooting: asset_server.load("player_shoot.png")})
+    commands.insert_resource(
+        PlayerTextures {
+            normal: asset_server.load("player.png"),
+            shooting: asset_server.load("player_shoot.png")
+        }
+    )
 }
 
 fn window_resize_system(mut commands: Commands, mut windows: ResMut<Windows>) {

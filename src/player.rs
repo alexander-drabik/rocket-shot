@@ -8,7 +8,7 @@ use bevy::sprite::collide_aabb::{collide, Collision};
 use bevy::tasks::{AsyncComputeTaskPool, ComputeTaskPool};
 use bevy::utils::tracing::instrument::WithDispatch;
 use crate::components::{Ground, Player, Rocket, Velocity};
-use crate::{PlayerTextures, RocketPlugin, Shooting};
+use crate::{PlayerTextures, PlayerCoords, RocketPlugin, Shooting};
 
 pub struct PlayerPlugin;
 impl Plugin for PlayerPlugin {
@@ -73,7 +73,8 @@ fn player_movement_system(
     mut query: Query<(&mut Velocity, &mut Transform), With<Player>>,
     mut ground_query: Query<(&mut Transform), (With<Ground>, Without<Player>)>,
     mut rocket_query: Query<(&mut Transform), (With<Rocket>, Without<Player>, Without<Ground>)>,
-    time: Res<Time>
+    time: Res<Time>,
+    mut player_y: ResMut<PlayerCoords>
 ) {
     for (mut velocity, mut transform) in query.iter_mut() {
         let translation = &mut transform.translation;
@@ -108,5 +109,7 @@ fn player_movement_system(
             transform2.translation.y += -velocity.y * time.delta_seconds();
             transform2.translation.x += -velocity.x * time.delta_seconds();
         }
+        player_y.0 = player_y.0 + -velocity.y * time.delta_seconds();
+        player_y.1 = player_y.1 + -velocity.x * time.delta_seconds();
     }
 }
